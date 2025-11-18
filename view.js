@@ -1,8 +1,9 @@
 import { TitlePage } from "./titlepage.js"
 
 class View {
-    constructor() {
-
+    constructor(container) {
+        this.container = document.querySelector(".container");
+        this.page = null;
     }
 
     clearPage() {
