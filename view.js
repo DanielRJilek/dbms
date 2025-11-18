@@ -1,4 +1,4 @@
-import { TitlePage } from "./titlepage.js"
+import { TitlePage } from "titlepage.js"
 
 class View {
     constructor() {
