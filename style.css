@@ -1,0 +1,59 @@
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.container {
+    min-height: 100vh;
+    background-image: url();
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: absolute;
+    inset: 0;
+}
+
+.page {
+    min-height: 100vh;
+    min-width: 100vw;
+    font-family: tangerine-bold;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+#title-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#title {
+    font-size: calc(max(10vw, 96px));
+    min-width: 500px;
+    text-align: center;
+    margin: 5vh 0;
+    color: rgb(63, 32, 9)
+}
+
+.page button {
+    max-width: 15vw;
+    min-width: 260px;
+    max-height: 70px;
+    font-family: tangerine;
+    font-size: 36px;
+    text-align: center;
+    border: solid rgb(177, 86, 21);
+    border-radius: 100rem;
+    border-width: 2px;
+    padding: 0.8rem;
+    background-color:darkorange;
+    margin: 2.5vh 0;
+    justify-self: center;
+}
+
+.page button:hover {
+    box-shadow: 0 0 10px darkorange;
+}
