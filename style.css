@@ -39,6 +39,7 @@ body {
 #title {
     font-size: calc(max(10vw, 96px));
     min-width: 500px;
+    max-height: 300px;
     text-align: center;
     margin: 5vh 0;
     color: rgb(63, 32, 9)
