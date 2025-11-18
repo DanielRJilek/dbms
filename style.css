@@ -8,7 +8,6 @@ body {
 
 .container {
     min-height: 100vh;
-    background-image: url();
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -28,6 +27,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-image: url(./logan.webp);
 }
 
 #title {
