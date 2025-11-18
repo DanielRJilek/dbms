@@ -16,7 +16,7 @@ class TitlePage {
         button.textContent = name;
         button.setAttribute("id", name + "-button");
         button.addEventListener("click", method.bind(this.view));
-        container.appendChild(flights);
+        container.appendChild(button);
     }
 
     render() {
