@@ -28,6 +28,12 @@ body {
     flex-direction: column;
     align-items: center;
     background-image: url(./logan.webp);
+    min-height: 100vh;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: absolute;
+    inset: 0;
 }
 
 #title {
