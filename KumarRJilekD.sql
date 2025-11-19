@@ -30,6 +30,7 @@ INSERT INTO Airport (airport_name, city, country) VALUES ('Dubai International A
 INSERT INTO Airport (airport_name, city, country) VALUES ('Tokyo Haneda Airport', 'Tokyo', 'Japan');
 INSERT INTO Airport (airport_name, city, country) VALUES ('Singapore Changi Airport', 'Singapore', 'Singapore');
 INSERT INTO Airport (airport_name, city, country) VALUES ('Toronto Pearson International Airport', 'Toronto', 'Canada');
+INSERT INTO Airport (airport_name, city, country) VALUES ('Doha International Airport', 'Doha', 'Qatar');
 
 
 CREATE TABLE Airline (
