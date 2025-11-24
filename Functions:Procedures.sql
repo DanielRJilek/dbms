@@ -1057,137 +1057,98 @@ BEGIN
 END $$
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS update_flight_arrival_time;
+DROP PROCEDURE IF EXISTS update_flight_attribute;
 DELIMITER $$
-CREATE PROCEDURE update_flight_arrival_time(
+CREATE PROCEDURE update_flight_attribute(
     IN input_flight_id INT,
-    IN input_new_arrival_time DATETIME
-)
-BEGIN
-    DECLARE exists_flight INT DEFAULT 0;
-
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
-
-    UPDATE Flight SET arrival_time = input_new_arrival_time WHERE flight_id = input_flight_id;
-END $$
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS update_flight_departure_time;
-DELIMITER $$
-CREATE PROCEDURE update_flight_departure_time(
-    IN input_flight_id INT,
-    IN input_new_departure_time DATETIME
-)
-BEGIN
-    DECLARE exists_flight INT DEFAULT 0;
-
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
-
-    UPDATE Flight SET departure_time = input_new_departure_time WHERE flight_id = input_flight_id;
-END $$
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS update_flight_status;
-DELIMITER $$
-CREATE PROCEDURE update_flight_status(
-    IN input_flight_id INT,
-    IN input_new_status VARCHAR(50)
-)
-BEGIN
-    DECLARE exists_flight INT DEFAULT 0;
-
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
-
-    IF input_new_status NOT IN ('Boarding','Delayed','On Time') THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Invalid status.';
-    END IF;
-
-    UPDATE Flight SET status = input_new_status WHERE flight_id = input_flight_id;
-END $$
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS update_flight_airline;
-DELIMITER $$
-CREATE PROCEDURE update_flight_airline(
-    IN input_flight_id INT,
-    IN input_new_airline VARCHAR(100)
+    IN input_attribute VARCHAR(50),
+    IN input_value VARCHAR(200)
 )
 BEGIN
     DECLARE exists_flight INT DEFAULT 0;
     DECLARE exists_airline INT DEFAULT 0;
-
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
-
-    SELECT COUNT(*) INTO exists_airline FROM Airline WHERE airline_name = input_new_airline;
-    IF exists_airline = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Airline does not exist.'; END IF;
-
-    UPDATE Flight SET airline_name = input_new_airline WHERE flight_id = input_flight_id;
-END $$
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS update_flight_aircraft;
-DELIMITER $$
-CREATE PROCEDURE update_flight_aircraft(
-    IN input_flight_id INT,
-    IN input_new_aircraft_id INT
-)
-BEGIN
-    DECLARE exists_flight INT DEFAULT 0;
+    DECLARE exists_airport INT DEFAULT 0;
     DECLARE exists_aircraft INT DEFAULT 0;
+    DECLARE exists_gate INT DEFAULT 0;
 
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
+    SELECT COUNT(*) INTO exists_flight 
+    FROM Flight WHERE flight_id = input_flight_id;
 
-    SELECT COUNT(*) INTO exists_aircraft FROM Aircraft WHERE aircraft_id = input_new_aircraft_id;
-    IF exists_aircraft = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Aircraft does not exist.'; END IF;
+    IF exists_flight = 0 THEN 
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.';
+    END IF;
 
-    UPDATE Flight SET aircraft_id = input_new_aircraft_id WHERE flight_id = input_flight_id;
+    CASE input_attribute
+
+        WHEN 'flight_number' THEN
+            UPDATE Flight SET flight_number = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'flight_type' THEN
+            IF input_value NOT IN ('Domestic','International') THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Invalid flight type.';
+            END IF;
+            UPDATE Flight SET flight_type = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'status' THEN
+            IF input_value NOT IN ('Boarding','Delayed','On Time','Cancelled','Landed') THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Invalid status.';
+            END IF;
+            UPDATE Flight SET status = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'departure_time' THEN
+            UPDATE Flight SET departure_time = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'arrival_time' THEN
+            UPDATE Flight SET arrival_time = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'aircraft_id' THEN
+            SELECT COUNT(*) INTO exists_aircraft 
+            FROM Aircraft WHERE aircraft_id = input_value;
+            IF exists_aircraft = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Aircraft does not exist.';
+            END IF;
+            UPDATE Flight SET aircraft_id = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'gate_id' THEN
+            SELECT COUNT(*) INTO exists_gate
+            FROM Gate WHERE gate_id = input_value;
+            IF exists_gate = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Gate does not exist.';
+            END IF;
+            UPDATE Flight SET gate_id = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'airline_name' THEN
+            SELECT COUNT(*) INTO exists_airline 
+            FROM Airline WHERE airline_name = input_value;
+            IF exists_airline = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Airline does not exist.';
+            END IF;
+            UPDATE Flight SET airline_name = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'arrival_airport_name' THEN
+            SELECT COUNT(*) INTO exists_airport 
+            FROM Airport WHERE airport_name = input_value;
+            IF exists_airport = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Arrival airport does not exist.';
+            END IF;
+            UPDATE Flight SET arrival_airport_name = input_value WHERE flight_id = input_flight_id;
+
+        WHEN 'destination_airport_name' THEN
+            SELECT COUNT(*) INTO exists_airport 
+            FROM Airport WHERE airport_name = input_value;
+            IF exists_airport = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Destination airport does not exist.';
+            END IF;
+            UPDATE Flight SET destination_airport_name = input_value WHERE flight_id = input_flight_id;
+
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Invalid attribute name.';
+    END CASE;
+
 END $$
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS update_flight_arrival_airport;
-DELIMITER $$
-CREATE PROCEDURE update_flight_arrival_airport(
-    IN input_flight_id INT,
-    IN input_new_arrival VARCHAR(100)
-)
-BEGIN
-    DECLARE exists_flight INT DEFAULT 0;
-    DECLARE exists_airport INT DEFAULT 0;
 
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
-
-    SELECT COUNT(*) INTO exists_airport FROM Airport WHERE airport_name = input_new_arrival;
-    IF exists_airport = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Arrival airport does not exist.'; END IF;
-
-    UPDATE Flight SET arrival_airport_name = input_new_arrival WHERE flight_id = input_flight_id;
-END $$
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS update_flight_destination_airport;
-DELIMITER $$
-CREATE PROCEDURE update_flight_destination_airport(
-    IN input_flight_id INT,
-    IN input_new_destination VARCHAR(100)
-)
-BEGIN
-    DECLARE exists_flight INT DEFAULT 0;
-    DECLARE exists_airport INT DEFAULT 0;
-
-    SELECT COUNT(*) INTO exists_flight FROM Flight WHERE flight_id = input_flight_id;
-    IF exists_flight = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Flight does not exist.'; END IF;
-
-    SELECT COUNT(*) INTO exists_airport FROM Airport WHERE airport_name = input_new_destination;
-    IF exists_airport = 0 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Destination airport does not exist.'; END IF;
-
-    UPDATE Flight SET destination_airport_name = input_new_destination WHERE flight_id = input_flight_id;
-END $$
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS cancel_flight;
 DELIMITER $$
