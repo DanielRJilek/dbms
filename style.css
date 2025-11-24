@@ -23,7 +23,7 @@ body {
     overflow: auto;
 }
 
-#title-page {
+#login-page {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,9 +37,8 @@ body {
 }
 
 #title {
-    font-size: calc(max(10vw, 96px));
+    font-size: calc(max(10vw, 80px));
     min-width: 500px;
-    max-height: 300px;
     text-align: center;
     margin: 5vh 0;
     color: rgb(63, 32, 9)

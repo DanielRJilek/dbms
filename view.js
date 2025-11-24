@@ -1,7 +1,7 @@
-import { TitlePage } from "./titlepage.js"
+import { LoginPage } from "./pages/loginpage.js"
 
 class View {
-    constructor(container) {
+    constructor() {
         this.container = document.querySelector(".container");
         this.page = null;
     }
@@ -12,10 +12,16 @@ class View {
         }
     }
 
-    renderTitlePage() {
+    renderLoginPage() {
         this.clearPage();
-        const titlePage = new TitlePage(this, this.container);
-        titlePage.render();
+        const loginPage = new LoginPage(this, this.container);
+        loginPage.render();
+    }
+
+    renderOptionsPage() {
+        this.clearPage();
+        const optionsPage = new OptionsPage(this, this.container);
+        optionsPage.render();
     }
 
     renderFlightsMenu() {
