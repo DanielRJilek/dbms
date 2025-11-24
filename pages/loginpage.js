@@ -29,7 +29,7 @@ class LoginPage{
         passlabel.setAttribute("for", "passinput");
         passlabel.textContent = "Password:";
         const passinput = document.createElement("input");
-        passinput.setAttribute("type", "text");
+        passinput.setAttribute("type", "password");
         passinput.setAttribute("id", "passinput");
         passinput.setAttribute("name", "passinput");
 
