@@ -1006,6 +1006,57 @@ BEGIN
 END $$
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS lookup_flight;
+DELIMITER $$
+CREATE PROCEDURE lookup_flight(
+    IN input_attribute VARCHAR(50),
+    IN input_value VARCHAR(200)
+)
+BEGIN
+    DECLARE sql_query TEXT;
+    DECLARE existence_check TEXT;
+    DECLARE value_exists INT DEFAULT 0;
+
+    IF input_attribute NOT IN (
+        'flight_id',
+        'flight_number',
+        'flight_type',
+        'status',
+        'departure_time',
+        'arrival_time',
+        'aircraft_id',
+        'gate_id',
+        'airline_name',
+        'arrival_airport_name',
+        'destination_airport_name'
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error: Invalid flight attribute.';
+    END IF;
+
+    SET existence_check = CONCAT(
+        'SELECT COUNT(*) FROM Flight WHERE ', input_attribute, ' = ?'
+    );
+
+    PREPARE stmt1 FROM existence_check;
+    EXECUTE stmt1 USING input_value INTO value_exists;
+    DEALLOCATE PREPARE stmt1;
+
+    IF value_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error: No matching flight found for given attribute/value.';
+    END IF;
+
+    SET sql_query = CONCAT(
+        'SELECT * FROM Flight WHERE ', input_attribute, ' = ?'
+    );
+
+    PREPARE stmt2 FROM sql_query;
+    EXECUTE stmt2 USING input_value;
+    DEALLOCATE PREPARE stmt2;
+END $$
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS update_flight_arrival_time;
 DELIMITER $$
 CREATE PROCEDURE update_flight_arrival_time(
