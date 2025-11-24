@@ -4,6 +4,19 @@ class LoginPage{
         this.view = view;
     }
 
+    static connect(form) {
+        let mysql = require('mysql');
+        let connection = mysql.createConnection({
+            host: 'localhost',
+            user: userinput,
+            password: passinput
+        });
+        connection.connect(function(err) {
+            if (err) throw err;
+            this.view.renderOptionsPage();
+        });
+    }
+
     createTitle(login_page) {
         const title = document.createElement("div");
         title.textContent = "Airport Management System";
@@ -54,18 +67,7 @@ class LoginPage{
         this.container.appendChild(login_page);
     }
 
-    static connect(form) {
-        let mysql = require('mysql');
-        let connection = mysql.createConnection({
-            host: 'localhost',
-            user: userinput,
-            password: passinput
-        });
-        connection.connect(function(err) {
-            if (err) throw err;
-            this.view.renderOptionsPage();
-        });
-    }
+    
 
 }
 
