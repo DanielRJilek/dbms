@@ -1,3 +1,4 @@
+
 DROP DATABASE IF EXISTS Kumar_Jilek_Logan_Database;
 CREATE DATABASE Kumar_Jilek_Logan_Database;
 USE Kumar_Jilek_Logan_Database;
@@ -278,6 +279,18 @@ INSERT INTO Passenger (full_name, gender, date_of_birth, nationality, status, pa
 INSERT INTO Passenger (full_name, gender, date_of_birth, nationality, status, passport_number) VALUES ('Sophia Alvarez', 'Female', '1994-01-29', 'Mexico', 'Available', 'P71120880');
 INSERT INTO Passenger (full_name, gender, date_of_birth, nationality, status, passport_number) VALUES ('Benjamin Hall', 'Male', '1986-09-14', 'USA', 'Booked', 'P60018832');
 
+UPDATE Passenger 
+SET status = 'Checked-In' 
+WHERE status = 'On-Time';
+
+UPDATE Passenger 
+SET status = 'Boarded' 
+WHERE status = 'Booked';
+
+UPDATE Passenger 
+SET status = 'Delayed' 
+WHERE status = 'Available';
+
 CREATE TABLE Passenger_Flight (
     pf_id          INT AUTO_INCREMENT PRIMARY KEY,
     passenger_id   INT NOT NULL,
@@ -473,5 +486,3 @@ INSERT INTO Baggage (ticket_num, weight, tag_number, destination, status, passen
 VALUES ('T2019', 23.55, 'BG119', 'Charles de Gaulle Airport', 'Loaded', 13, 13);
 INSERT INTO Baggage (ticket_num, weight, tag_number, destination, status, passenger_id, flight_id)
 VALUES ('T2020', 26.10, 'BG120', 'Frankfurt Airport', 'Loaded', 14, 14);
-
-
