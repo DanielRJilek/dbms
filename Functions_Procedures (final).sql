@@ -366,6 +366,22 @@ BEGIN
 END $$
 DELIMITER ;
 
+DROP FUNCTION IF EXISTS total_Airlines;
+DELIMITER $$
+
+CREATE FUNCTION total_Airlines()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+
+    SELECT COUNT(*) INTO total
+    FROM Airline;
+
+    RETURN total;
+END$$
+
+DELIMITER ;
 
 
 
@@ -896,6 +912,24 @@ main_block: BEGIN
 END main_block $$
 DELIMITER ;
 
+DROP FUNCTION IF EXISTS total_Flights;
+DELIMITER $$
+
+CREATE FUNCTION total_Flights()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+
+    SELECT COUNT(*) INTO total
+    FROM Flight;
+
+    RETURN total;
+END$$
+
+DELIMITER ;
+
+
 DROP PROCEDURE IF EXISTS read_Flight;
 DELIMITER $$
 
@@ -1150,6 +1184,22 @@ BEGIN
     DELETE FROM Seat
     WHERE id = seat_id;
 END $$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS seat_mark_occupied;
+DELIMITER $$
+
+CREATE TRIGGER seat_mark_occupied
+AFTER INSERT ON Passenger_Flight
+FOR EACH ROW
+BEGIN
+    IF NEW.seat_id IS NOT NULL THEN
+        UPDATE Seat
+        SET status = 'Occupied'
+        WHERE id = NEW.seat_id;
+    END IF;
+END$$
+
 DELIMITER ;
 
 
