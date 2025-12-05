@@ -40,11 +40,14 @@ INSERT INTO Airport (airport_name, city, country) VALUES
 
 CREATE TABLE Airline (
     id              INT AUTO_INCREMENT PRIMARY KEY,
-    airline_name    VARCHAR(100) UNIQUE,
-    country         VARCHAR(100),
+    airline_name    VARCHAR(100) NOT NULL UNIQUE,
+    country         VARCHAR(100) NOT NULL,
     airport_id      INT,
     FOREIGN KEY (airport_id) REFERENCES Airport(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 );
+
 
 INSERT INTO Airline (airline_name, country, airport_id) VALUES
 ('Delta Air Lines', 'USA', 1),
@@ -77,11 +80,14 @@ INSERT INTO Airline (airline_name, country, airport_id) VALUES
 
 CREATE TABLE Terminal (
     id              INT AUTO_INCREMENT PRIMARY KEY,
-    terminal_name   VARCHAR(50),
-    num_gates       INT,
-    airport_id      INT,
+    terminal_name   VARCHAR(50) NOT NULL,
+    num_gates       INT NOT NULL,
+    airport_id      INT NOT NULL,
     FOREIGN KEY (airport_id) REFERENCES Airport(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
+
 
 INSERT INTO Terminal (terminal_name, num_gates, airport_id) VALUES
 ('Terminal A', 8, 1),
@@ -91,11 +97,14 @@ INSERT INTO Terminal (terminal_name, num_gates, airport_id) VALUES
 
 CREATE TABLE Gate (
     id              INT AUTO_INCREMENT PRIMARY KEY,
-    gate_name       VARCHAR(20),
-    status          VARCHAR(50),
-    terminal_id     INT,
+    gate_name       VARCHAR(20) NOT NULL,
+    status          VARCHAR(50) NOT NULL DEFAULT 'Available',
+    terminal_id     INT NOT NULL,
     FOREIGN KEY (terminal_id) REFERENCES Terminal(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
+
 
 INSERT INTO Gate (gate_name, status, terminal_id) VALUES
 ('B1', 'Available', 2),
@@ -158,22 +167,33 @@ INSERT INTO Aircraft (model, capacity) VALUES
 
 CREATE TABLE Flight (
     id                          INT AUTO_INCREMENT PRIMARY KEY,
-    flight_number               VARCHAR(20) UNIQUE,
-    flight_type                 VARCHAR(50),
-    status                      VARCHAR(50),
-    departure_time              DATETIME,
-    arrival_time                DATETIME,
-    aircraft_id                 INT,
+    flight_number               VARCHAR(20) NOT NULL UNIQUE,
+    flight_type                 VARCHAR(50) NOT NULL,
+    status                      VARCHAR(50) NOT NULL DEFAULT 'On Time',
+    departure_time              DATETIME NOT NULL,
+    arrival_time                DATETIME NOT NULL,
+    aircraft_id                 INT NOT NULL,
     gate_id                     INT,
     airline_id                  INT,
     arrival_airport_id          INT,
     destination_airport_id      INT,
-    FOREIGN KEY (aircraft_id) REFERENCES Aircraft(id),
-    FOREIGN KEY (gate_id) REFERENCES Gate(id),
-    FOREIGN KEY (airline_id) REFERENCES Airline(id),
-    FOREIGN KEY (arrival_airport_id) REFERENCES Airport(id),
+    FOREIGN KEY (aircraft_id) REFERENCES Aircraft(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    FOREIGN KEY (gate_id) REFERENCES Gate(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    FOREIGN KEY (airline_id) REFERENCES Airline(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    FOREIGN KEY (arrival_airport_id) REFERENCES Airport(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
     FOREIGN KEY (destination_airport_id) REFERENCES Airport(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 );
+
 
 INSERT INTO Flight (
     flight_number, flight_type, status, departure_time, arrival_time,
@@ -218,11 +238,13 @@ INSERT INTO Flight (
 
 CREATE TABLE Seat (
     id            INT AUTO_INCREMENT PRIMARY KEY,
-    seat_number   VARCHAR(10),
-    class         VARCHAR(20),
-    status        VARCHAR(50),
+    seat_number   VARCHAR(10) NOT NULL,
+    class         VARCHAR(20) NOT NULL,
+    status        VARCHAR(50) NOT NULL DEFAULT 'Available',
     flight_id     INT NOT NULL,
     FOREIGN KEY (flight_id) REFERENCES Flight(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 INSERT INTO Seat (seat_number, class, status, flight_id) VALUES
@@ -281,13 +303,14 @@ INSERT INTO Seat (seat_number, class, status, flight_id) VALUES
 
 CREATE TABLE Passenger (
     id              INT AUTO_INCREMENT PRIMARY KEY,
-    full_name       VARCHAR(200),
+    full_name       VARCHAR(200) NOT NULL,
     gender          VARCHAR(20),
     date_of_birth   DATE,
     nationality     VARCHAR(100),
-    status          VARCHAR(50),
+    status          VARCHAR(50) NOT NULL DEFAULT 'Booked',
     passport_number VARCHAR(50) UNIQUE
 );
+
 
 
 INSERT INTO Passenger (full_name, gender, date_of_birth, nationality, status, passport_number) VALUES
@@ -334,10 +357,17 @@ CREATE TABLE Passenger_Flight (
     passenger_id  INT NOT NULL,
     flight_id     INT NOT NULL,
     seat_id       INT,
-    FOREIGN KEY (passenger_id) REFERENCES Passenger(id),
-    FOREIGN KEY (flight_id) REFERENCES Flight(id),
+    FOREIGN KEY (passenger_id) REFERENCES Passenger(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (flight_id) REFERENCES Flight(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (seat_id) REFERENCES Seat(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 );
+
 
 
 
@@ -416,9 +446,14 @@ CREATE TABLE Flight_Crew (
     id        INT AUTO_INCREMENT PRIMARY KEY,
     flight_id INT NOT NULL,
     crew_id   INT NOT NULL,
-    FOREIGN KEY (flight_id) REFERENCES Flight(id),
+    FOREIGN KEY (flight_id) REFERENCES Flight(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (crew_id) REFERENCES Crew(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
+
 
 INSERT INTO Flight_Crew (flight_id, crew_id) VALUES
 (1, 1),
@@ -445,12 +480,15 @@ INSERT INTO Flight_Crew (flight_id, crew_id) VALUES
 
 CREATE TABLE Meal (
     id        INT AUTO_INCREMENT PRIMARY KEY,
-    meal_name VARCHAR(100),
+    meal_name VARCHAR(100) NOT NULL,
     cuisine   VARCHAR(50),
-    quantity  INT,
+    quantity  INT NOT NULL,
     flight_id INT NOT NULL,
     FOREIGN KEY (flight_id) REFERENCES Flight(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
+
 
 INSERT INTO Meal (meal_name, cuisine, quantity, flight_id) VALUES
 ('Chicken Alfredo', 'American', 120, 1),
@@ -487,12 +525,17 @@ CREATE TABLE Baggage (
     weight       DECIMAL(5,2),
     tag_number   VARCHAR(50),
     destination  VARCHAR(100),
-    status       VARCHAR(50),
-    passenger_id INT,
-    flight_id    INT,
-    FOREIGN KEY (passenger_id) REFERENCES Passenger(id),
+    status       VARCHAR(50) NOT NULL DEFAULT 'Checked-In',
+    passenger_id INT NOT NULL,
+    flight_id    INT NOT NULL,
+    FOREIGN KEY (passenger_id) REFERENCES Passenger(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (flight_id) REFERENCES Flight(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
+
 
 
 INSERT INTO Baggage (ticket_num, weight, tag_number, destination, status, passenger_id, flight_id) VALUES
@@ -516,3 +559,5 @@ INSERT INTO Baggage (ticket_num, weight, tag_number, destination, status, passen
 ('T2018', 28.30, 'BG118', 'Gatwick Airport', 'Checked-In', 12, 12),
 ('T2019', 23.55, 'BG119', 'Charles de Gaulle Airport', 'Loaded', 13, 13),
 ('T2020', 26.10, 'BG120', 'Frankfurt Airport', 'Loaded', 14, 14);
+
+ 
