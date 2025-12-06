@@ -140,58 +140,48 @@ END $$
 DELIMITER ;
 
 
-
-
 DROP PROCEDURE IF EXISTS update_Airport;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE update_Airport(
-    IN update_attr  VARCHAR(50),
-    IN update_value VARCHAR(100),
-    IN match_attr   VARCHAR(50),
-    IN match_value  VARCHAR(100)
+    airport_id INT,
+    attribute  VARCHAR(64),
+    value      VARCHAR(100)
 )
 BEGIN
+    SET @a = value;
+    SET @b = airport_id;
 
-    IF match_attr NOT IN ('city', 'country', 'airport_id') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid match attribute';
-    END IF;
+    CASE
 
-    IF update_attr NOT IN ('city', 'country', 'airport_name') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid update attribute';
-    END IF;
+        WHEN attribute = 'city' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airport SET city = ? WHERE airport_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF match_attr = 'city' AND (SELECT COUNT(*) FROM Airport WHERE city = match_value) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No airport found to update';
-    END IF;
+        WHEN attribute = 'country' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airport SET country = ? WHERE airport_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF match_attr = 'country' AND (SELECT COUNT(*) FROM Airport WHERE country = match_value) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No airport found to update';
-    END IF;
+        WHEN attribute = 'airport_name' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airport SET airport_name = ? WHERE airport_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF match_attr = 'airport_id' AND (SELECT COUNT(*) FROM Airport WHERE airport_id = match_value) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No airport found to update';
-    END IF;
+        WHEN attribute = 'airport_id' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airport SET airport_id = ? WHERE airport_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @val_update = update_value;
-    SET @val_match  = match_value;
+    END CASE;
 
-    SET @sql = CONCAT(
-        'UPDATE Airport SET ', update_attr, ' = ? WHERE ', match_attr, ' = ?'
-    );
-
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @val_update, @val_match;
-    DEALLOCATE PREPARE stmt;
-
-END $$
+END //
 
 DELIMITER ;
+
+
+
 
 DROP PROCEDURE IF EXISTS delete_Airport;
 DELIMITER $$
@@ -288,59 +278,41 @@ main_block: BEGIN
 END main_block $$
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS update_Airline;
-DELIMITER $$
+DELIMITER //
 
+DROP PROCEDURE IF EXISTS update_Airline //
 CREATE PROCEDURE update_Airline(
-    IN update_attr  VARCHAR(50),
-    IN update_value VARCHAR(100),
-    IN match_attr   VARCHAR(50),
-    IN match_value  VARCHAR(100)
+    airline_id INT,
+    attribute  VARCHAR(64),
+    value      VARCHAR(64)
 )
-main_block: BEGIN
+BEGIN
+    SET @a = value;
+    SET @b = airline_id;
 
-    IF match_attr NOT IN ('airline_name', 'country', 'airport_name', 'airline_id') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid match attribute. Allowed: airline_name, country, airport_name, airline_id';
-    END IF;
+    CASE
+        WHEN attribute = 'airline_name' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airline SET airline_name = ? WHERE airline_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF update_attr NOT IN ('airline_name', 'country', 'airport_name') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid update attribute. Allowed: airline_name, country, airport_name';
-    END IF;
+        WHEN attribute = 'country' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airline SET country = ? WHERE airline_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF match_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Match value cannot be NULL';
-    END IF;
+        WHEN attribute = 'airport_name' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airline SET airport_name = ? WHERE airline_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF update_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Update value cannot be NULL';
-    END IF;
+        WHEN attribute = 'airline_id' THEN
+            PREPARE stmt FROM 
+                'UPDATE Airline SET airline_id = ? WHERE airline_id = ?';
+            EXECUTE stmt USING @a, @b;
+    END CASE;
 
-    IF (SELECT COUNT(*) FROM Airline WHERE
-        (match_attr = 'airline_name' AND airline_name = match_value) OR
-        (match_attr = 'country' AND country = match_value) OR
-        (match_attr = 'airport_name' AND airport_name = match_value) OR
-        (match_attr = 'airline_id' AND airline_id = match_value)
-    ) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No matching airline found to update';
-    END IF;
-
-    SET @u = update_value;
-    SET @m = match_value;
-
-    SET @sql = CONCAT(
-        'UPDATE Airline SET ', update_attr, ' = ? WHERE ', match_attr, ' = ?'
-    );
-
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @u, @m;
-    DEALLOCATE PREPARE stmt;
-
-END main_block $$
+END //
 
 DELIMITER ;
 
@@ -457,59 +429,46 @@ DELIMITER ;
 
 
 DROP PROCEDURE IF EXISTS update_Terminal;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE update_Terminal(
-    IN update_attr  VARCHAR(50),
-    IN update_value VARCHAR(100),
-    IN match_attr   VARCHAR(50),
-    IN match_value  VARCHAR(100)
+    terminal_id INT,
+    attribute   VARCHAR(64),
+    value       VARCHAR(100)
 )
-main_block: BEGIN
+BEGIN
 
-    IF match_attr NOT IN ('terminal_name','airport_name','num_gates','terminal_id') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid match attribute';
-    END IF;
+    SET @a = value;
+    SET @b = terminal_id;
 
-    IF update_attr NOT IN ('terminal_name','airport_name','num_gates') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid update attribute';
-    END IF;
+    CASE
 
-    IF match_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Match value cannot be NULL';
-    END IF;
+        WHEN attribute = 'terminal_name' THEN
+            PREPARE stmt FROM 
+                'UPDATE Terminal SET terminal_name = ? WHERE terminal_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF update_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Update value cannot be NULL';
-    END IF;
+        WHEN attribute = 'airport_name' THEN
+            PREPARE stmt FROM 
+                'UPDATE Terminal SET airport_name = ? WHERE terminal_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF (SELECT COUNT(*) FROM Terminal WHERE
-        (match_attr='terminal_name' AND terminal_name=match_value) OR
-        (match_attr='airport_name' AND airport_name=match_value) OR
-        (match_attr='num_gates' AND num_gates=match_value) OR
-        (match_attr='terminal_id' AND terminal_id=match_value)
-    ) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No matching terminal found';
-    END IF;
+        WHEN attribute = 'num_gates' THEN
+            PREPARE stmt FROM 
+                'UPDATE Terminal SET num_gates = ? WHERE terminal_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @u = update_value;
-    SET @m = match_value;
+        WHEN attribute = 'terminal_id' THEN
+            PREPARE stmt FROM 
+                'UPDATE Terminal SET terminal_id = ? WHERE terminal_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @sql = CONCAT(
-        'UPDATE Terminal SET ', update_attr, ' = ? WHERE ', match_attr, ' = ?'
-    );
+    END CASE;
 
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @u, @m;
-    DEALLOCATE PREPARE stmt;
+END //
 
-END main_block $$
 DELIMITER ;
+
 
 DROP PROCEDURE IF EXISTS delete_Terminal;
 DELIMITER $$
@@ -616,60 +575,46 @@ END main_block $$
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS update_Gate;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE update_Gate(
-    IN update_attr  VARCHAR(50),
-    IN update_value VARCHAR(100),
-    IN match_attr   VARCHAR(50),
-    IN match_value  VARCHAR(100)
+    gate_id   INT,
+    attribute VARCHAR(64),
+    value     VARCHAR(100)
 )
-main_block: BEGIN
+BEGIN
 
-    IF match_attr NOT IN ('gate_id','gate_name','status','terminal_id') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid match attribute';
-    END IF;
+    SET @a = value;
+    SET @b = gate_id;
 
-    IF update_attr NOT IN ('gate_name','status','terminal_id') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid update attribute';
-    END IF;
+    CASE
 
-    IF match_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Match value cannot be NULL';
-    END IF;
+        WHEN attribute = 'gate_name' THEN
+            PREPARE stmt FROM 
+                'UPDATE Gate SET gate_name = ? WHERE gate_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF update_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Update value cannot be NULL';
-    END IF;
+        WHEN attribute = 'status' THEN
+            PREPARE stmt FROM 
+                'UPDATE Gate SET status = ? WHERE gate_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF (SELECT COUNT(*) FROM Gate WHERE
-        (match_attr='gate_id' AND gate_id=match_value) OR
-        (match_attr='gate_name' AND gate_name=match_value) OR
-        (match_attr='status' AND status=match_value) OR
-        (match_attr='terminal_id' AND terminal_id=match_value)
-    ) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No matching gate found to update';
-    END IF;
+        WHEN attribute = 'terminal_id' THEN
+            PREPARE stmt FROM 
+                'UPDATE Gate SET terminal_id = ? WHERE gate_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @u = update_value;
-    SET @m = match_value;
+        WHEN attribute = 'gate_id' THEN
+            PREPARE stmt FROM 
+                'UPDATE Gate SET gate_id = ? WHERE gate_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @sql = CONCAT(
-        'UPDATE Gate SET ', update_attr, ' = ? WHERE ', match_attr, ' = ?'
-    );
+    END CASE;
 
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @u, @m;
-    DEALLOCATE PREPARE stmt;
-
-END main_block $$
+END //
 
 DELIMITER ;
+
 
 DROP PROCEDURE IF EXISTS delete_Gate;
 DELIMITER $$
@@ -759,64 +704,46 @@ END main_block $$
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS update_Aircraft;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE update_Aircraft(
-    IN update_attr  VARCHAR(50),
-    IN update_value VARCHAR(100),
-    IN match_attr   VARCHAR(50),
-    IN match_value  VARCHAR(100)
+    aircraft_id INT,
+    attribute   VARCHAR(64),
+    value       VARCHAR(100)
 )
-main_block: BEGIN
+BEGIN
 
-    IF match_attr NOT IN ('aircraft_id','model','capacity') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid match attribute';
-    END IF;
+    SET @a = value;
+    SET @b = aircraft_id;
 
-    IF update_attr NOT IN ('model','capacity') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid update attribute';
-    END IF;
+    CASE
 
-    IF match_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Match value cannot be NULL';
-    END IF;
+        WHEN attribute = 'model' THEN
+            PREPARE stmt FROM 
+                'UPDATE Aircraft SET model = ? WHERE aircraft_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF update_value IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Update value cannot be NULL';
-    END IF;
+        WHEN attribute = 'capacity' THEN
+            IF @a <= 0 THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Capacity must be greater than zero';
+            END IF;
 
-    IF update_attr = 'capacity' AND update_value <= 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Capacity must be greater than zero';
-    END IF;
+            PREPARE stmt FROM 
+                'UPDATE Aircraft SET capacity = ? WHERE aircraft_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF (SELECT COUNT(*) FROM Aircraft WHERE
-        (match_attr='aircraft_id' AND aircraft_id=match_value) OR
-        (match_attr='model' AND model=match_value) OR
-        (match_attr='capacity' AND capacity=match_value)
-    ) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'No matching aircraft found';
-    END IF;
+        WHEN attribute = 'aircraft_id' THEN
+            PREPARE stmt FROM 
+                'UPDATE Aircraft SET aircraft_id = ? WHERE aircraft_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @u = update_value;
-    SET @m = match_value;
+    END CASE;
 
-    SET @sql = CONCAT(
-        'UPDATE Aircraft SET ', update_attr, ' = ? WHERE ', match_attr, ' = ?'
-    );
-
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @u, @m;
-    DEALLOCATE PREPARE stmt;
-
-END main_block $$
+END //
 
 DELIMITER ;
+
 
 DROP PROCEDURE IF EXISTS delete_Aircraft;
 DELIMITER $$
@@ -971,54 +898,79 @@ END main_block $$
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS update_Flight;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE update_Flight(
-    IN update_attr VARCHAR(50),
-    IN update_val VARCHAR(200),
-    IN match_attr VARCHAR(50),
-    IN match_val VARCHAR(200)
+    flight_id INT,
+    attribute VARCHAR(64),
+    value     VARCHAR(200)
 )
-main_block: BEGIN
+BEGIN
 
-    IF match_attr NOT IN (
-        'flight_id','flight_number','flight_type','status','departure_time',
-        'arrival_time','aircraft_id','gate_id','airline_name',
-        'arrival_airport_name','destination_airport_name'
-    ) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Invalid match attribute';
-    END IF;
+    SET @a = value;
+    SET @b = flight_id;
 
-    IF update_attr NOT IN (
-        'flight_number','flight_type','status','departure_time','arrival_time',
-        'aircraft_id','gate_id','airline_name',
-        'arrival_airport_name','destination_airport_name'
-    ) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Invalid update attribute';
-    END IF;
+    CASE
 
-    IF match_val IS NULL OR update_val IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='NULL values not allowed';
-    END IF;
+        WHEN attribute = 'flight_number' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET flight_number = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    IF (SELECT COUNT(*) FROM Flight WHERE
-        (match_attr='flight_id' AND flight_id=match_val) OR
-        (match_attr='flight_number' AND flight_number=match_val) OR
-        (match_attr='airline_name' AND airline_name=match_val)
-    ) = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='No matching flight';
-    END IF;
+        WHEN attribute = 'flight_type' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET flight_type = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @u = update_val;
-    SET @m = match_val;
+        WHEN attribute = 'status' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET status = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    SET @sql = CONCAT('UPDATE Flight SET ', update_attr, ' = ? WHERE ', match_attr, ' = ?');
+        WHEN attribute = 'departure_time' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET departure_time = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @u, @m;
-    DEALLOCATE PREPARE stmt;
+        WHEN attribute = 'arrival_time' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET arrival_time = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-END main_block $$
+        WHEN attribute = 'aircraft_id' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET aircraft_id = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'gate_id' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET gate_id = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'airline_name' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET airline_name = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'arrival_airport_name' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET arrival_airport_name = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'destination_airport_name' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET destination_airport_name = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'flight_id' THEN
+            PREPARE stmt FROM
+                'UPDATE Flight SET flight_id = ? WHERE flight_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+    END CASE;
+
+END //
+
 DELIMITER ;
 
 
@@ -1116,35 +1068,33 @@ END $$
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS update_Seat;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE update_Seat(
-    IN input_seat_id INT,
-    IN update_attr VARCHAR(50),
-    IN update_val  VARCHAR(100)
+    seat_id  INT,
+    attribute VARCHAR(64),
+    value     VARCHAR(100)
 )
 BEGIN
-    DECLARE exists_seat INT DEFAULT 0;
     DECLARE exists_flight INT DEFAULT 0;
 
-    SELECT COUNT(*) INTO exists_seat
-    FROM Seat
-    WHERE seat_id = input_seat_id;
+    SET @a = value;
+    SET @b = seat_id;
 
-    IF exists_seat = 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Seat does not exist';
-    END IF;
-
-    IF update_attr NOT IN ('seat_number','class','status','flight_id') THEN
+    IF attribute NOT IN ('seat_number','class','status','flight_id') THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Invalid seat update attribute';
     END IF;
 
-    IF update_attr = 'flight_id' THEN
+    IF (SELECT COUNT(*) FROM Seat WHERE seat_id = seat_id) = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Seat does not exist';
+    END IF;
+
+    IF attribute = 'flight_id' THEN
         SELECT COUNT(*) INTO exists_flight
         FROM Flight
-        WHERE flight_id = update_val;
+        WHERE flight_id = @a;
 
         IF exists_flight = 0 THEN
             SIGNAL SQLSTATE '45000'
@@ -1152,15 +1102,34 @@ BEGIN
         END IF;
     END IF;
 
-    SET @id = input_seat_id;
-    SET @val = update_val;
-    SET @sql = CONCAT('UPDATE Seat SET ', update_attr, ' = ? WHERE seat_id = ?');
+    CASE
+        WHEN attribute = 'seat_number' THEN
+            PREPARE stmt FROM
+                'UPDATE Seat SET seat_number = ? WHERE seat_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt USING @val, @id;
-    DEALLOCATE PREPARE stmt;
+        WHEN attribute = 'class' THEN
+            PREPARE stmt FROM
+                'UPDATE Seat SET class = ? WHERE seat_id = ?';
+            EXECUTE stmt USING @a, @b;
 
-END $$
+        WHEN attribute = 'status' THEN
+            PREPARE stmt FROM
+                'UPDATE Seat SET status = ? WHERE seat_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'flight_id' THEN
+            PREPARE stmt FROM
+                'UPDATE Seat SET flight_id = ? WHERE seat_id = ?';
+            EXECUTE stmt USING @a, @b;
+
+        WHEN attribute = 'seat_id' THEN
+            PREPARE stmt FROM
+                'UPDATE Seat SET seat_id = ? WHERE seat_id = ?';
+            EXECUTE stmt USING @a, @b;
+    END CASE;
+
+END //
 
 DELIMITER ;
 
